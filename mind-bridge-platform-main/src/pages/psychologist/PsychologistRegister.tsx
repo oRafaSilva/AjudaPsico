@@ -1,14 +1,47 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeft, User, Mail, CreditCard, Calendar, Lock, MapPin, Building } from "lucide-react";
-import brainLogo from "@/assets/brain-logo.png";
+import { useState } from "react"
+import { useNavigate } from "react-router-dom"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import {
+  ArrowLeft,
+  User,
+  Mail,
+  CreditCard,
+  Calendar,
+  Lock,
+  MapPin,
+  Building,
+} from "lucide-react"
+import brainLogo from "@/assets/brain-logo.png"
+import { checkUserAlreadyExists, registerUser } from "@/lib/utils"
+import bcrypt from "bcryptjs"
+
+type FormData = {
+  firstName: string
+  lastName: string
+  email: string
+  crp: string
+  birthDate: string
+  gender: string
+  insurance: string
+  password: string
+  address: string
+  neighborhood: string
+  city: string
+  role: "psychologist"
+}
 
 const PsychologistRegister = () => {
-  const [formData, setFormData] = useState({
-    name: "",
+  const [formData, setFormData] = useState<FormData>({
+    firstName: "",
+    lastName: "",
     email: "",
     crp: "",
     birthDate: "",
@@ -17,18 +50,46 @@ const PsychologistRegister = () => {
     password: "",
     address: "",
     neighborhood: "",
-    city: ""
-  });
-  const navigate = useNavigate();
+    city: "",
+    role: "psychologist",
+  })
 
-  const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-  };
+  const navigate = useNavigate()
 
-  const handleRegister = () => {
-    // Mock registration logic
-    navigate("/psychologist/login");
-  };
+  const handleInputChange = (field: keyof FormData, value: string) => {
+    setFormData((prev) => ({ ...prev, [field]: value }))
+  }
+
+  const handleRegister = async () => {
+    // validação simples — ajuste conforme necessidade
+    if (!formData.firstName || !formData.lastName || !formData.email || !formData.password) {
+      console.log("Preencha os campos obrigatórios")
+      return
+    }
+
+    try {
+      const userExists = await checkUserAlreadyExists(formData.email)
+      if (userExists) {
+        console.log("Usuário já cadastrado")
+        return
+      }
+
+      // Hash da senha
+      const hashedPwd = await bcrypt.hash(formData.password, 10)
+
+      const payload = {
+        ...formData,
+        password: hashedPwd,
+      }
+
+      const wasRegistered = await registerUser(payload)
+      console.log("Cadastrado:", wasRegistered)
+
+      navigate("/psychologist/login")
+    } catch (err) {
+      console.error("Erro ao cadastrar:", err)
+    }
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -42,16 +103,12 @@ const PsychologistRegister = () => {
         >
           <ArrowLeft className="h-6 w-6" />
         </Button>
-        
+
         <div className="flex flex-col items-center">
-          <img 
-            src={brainLogo} 
-            alt="PsicoAjuda" 
-            className="w-12 h-12 mb-2"
-          />
+          <img src={brainLogo} alt="PsicoAjuda" className="w-12 h-12 mb-2" />
           <span className="text-sm text-muted-foreground">PsicoAjuda</span>
         </div>
-        
+
         <div className="w-10" />
       </div>
 
@@ -61,27 +118,44 @@ const PsychologistRegister = () => {
           <h1 className="text-xl font-bold text-foreground mb-8">Cadastre-se abaixo</h1>
 
           <div className="space-y-4 mb-8">
+            {/* First Name */}
             <div>
               <label className="block text-sm font-medium text-foreground mb-2">Nome:</label>
               <div className="relative">
                 <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-subtle-gray h-5 w-5" />
                 <Input
                   type="text"
-                  placeholder="Carlos Silva"
-                  value={formData.name}
-                  onChange={(e) => handleInputChange("name", e.target.value)}
+                  placeholder="Carlos"
+                  value={formData.firstName}
+                  onChange={(e) => handleInputChange("firstName", e.target.value)}
                   className="pl-12 h-12 border-border"
                 />
               </div>
             </div>
 
+            {/* Last Name */}
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-2">Sobrenome:</label>
+              <div className="relative">
+                <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-subtle-gray h-5 w-5" />
+                <Input
+                  type="text"
+                  placeholder="Cardoso"
+                  value={formData.lastName}
+                  onChange={(e) => handleInputChange("lastName", e.target.value)}
+                  className="pl-12 h-12 border-border"
+                />
+              </div>
+            </div>
+
+            {/* Email */}
             <div>
               <label className="block text-sm font-medium text-foreground mb-2">Email:</label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-subtle-gray h-5 w-5" />
                 <Input
                   type="email"
-                  placeholder="carlos.silva@fatec.sp.gov.br"
+                  placeholder="carlos.silva@exemplo.com"
                   value={formData.email}
                   onChange={(e) => handleInputChange("email", e.target.value)}
                   className="pl-12 h-12 border-border"
@@ -89,13 +163,14 @@ const PsychologistRegister = () => {
               </div>
             </div>
 
+            {/* CRP */}
             <div>
               <label className="block text-sm font-medium text-foreground mb-2">CRP:</label>
               <div className="relative">
                 <CreditCard className="absolute left-3 top-1/2 transform -translate-y-1/2 text-subtle-gray h-5 w-5" />
                 <Input
                   type="text"
-                  placeholder="123.456.789-10"
+                  placeholder="06/123456"
                   value={formData.crp}
                   onChange={(e) => handleInputChange("crp", e.target.value)}
                   className="pl-12 h-12 border-border"
@@ -103,6 +178,7 @@ const PsychologistRegister = () => {
               </div>
             </div>
 
+            {/* Birth Date */}
             <div>
               <label className="block text-sm font-medium text-foreground mb-2">Data de Nascimento:</label>
               <div className="relative">
@@ -116,6 +192,7 @@ const PsychologistRegister = () => {
               </div>
             </div>
 
+            {/* Gender */}
             <div>
               <label className="block text-sm font-medium text-foreground mb-2">Sexo:</label>
               <Select onValueChange={(value) => handleInputChange("gender", value)}>
@@ -130,6 +207,7 @@ const PsychologistRegister = () => {
               </Select>
             </div>
 
+            {/* Insurance */}
             <div>
               <label className="block text-sm font-medium text-foreground mb-2">Convênio:</label>
               <Select onValueChange={(value) => handleInputChange("insurance", value)}>
@@ -145,6 +223,7 @@ const PsychologistRegister = () => {
               </Select>
             </div>
 
+            {/* Password */}
             <div>
               <label className="block text-sm font-medium text-foreground mb-2">Senha:</label>
               <div className="relative">
@@ -159,12 +238,14 @@ const PsychologistRegister = () => {
               </div>
             </div>
 
+            {/* Address */}
             <div>
               <label className="block text-sm font-medium text-foreground mb-2">Endereço:</label>
               <div className="relative">
                 <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-subtle-gray h-5 w-5" />
                 <Input
                   type="text"
+                  placeholder="Rua Exemplo, 123"
                   value={formData.address}
                   onChange={(e) => handleInputChange("address", e.target.value)}
                   className="pl-12 h-12 border-border"
@@ -172,12 +253,14 @@ const PsychologistRegister = () => {
               </div>
             </div>
 
+            {/* Neighborhood */}
             <div>
               <label className="block text-sm font-medium text-foreground mb-2">Bairro:</label>
               <div className="relative">
                 <Building className="absolute left-3 top-1/2 transform -translate-y-1/2 text-subtle-gray h-5 w-5" />
                 <Input
                   type="text"
+                  placeholder="Centro"
                   value={formData.neighborhood}
                   onChange={(e) => handleInputChange("neighborhood", e.target.value)}
                   className="pl-12 h-12 border-border"
@@ -185,12 +268,14 @@ const PsychologistRegister = () => {
               </div>
             </div>
 
+            {/* City */}
             <div>
               <label className="block text-sm font-medium text-foreground mb-2">Cidade:</label>
               <div className="relative">
                 <Building className="absolute left-3 top-1/2 transform -translate-y-1/2 text-subtle-gray h-5 w-5" />
                 <Input
                   type="text"
+                  placeholder="Sorocaba"
                   value={formData.city}
                   onChange={(e) => handleInputChange("city", e.target.value)}
                   className="pl-12 h-12 border-border"
@@ -199,17 +284,13 @@ const PsychologistRegister = () => {
             </div>
           </div>
 
-          <Button
-            variant="psychologist"
-            className="w-full h-12"
-            onClick={handleRegister}
-          >
+          <Button variant="psychologist" className="w-full h-12" onClick={handleRegister}>
             CADASTRAR
           </Button>
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default PsychologistRegister;
+export default PsychologistRegister
