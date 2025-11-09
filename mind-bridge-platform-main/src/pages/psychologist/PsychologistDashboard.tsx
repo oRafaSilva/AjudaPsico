@@ -19,9 +19,10 @@ const PsychologistDashboard = () => {
 	const navigate = useNavigate()
 	const { user } = useAuth()
 
-	const [currentDate, setCurrentDate] = useState(new Date(2025, 5, 24)) // June 24, 2025
+	// Data atual
+	const [currentDate, setCurrentDate] = useState(new Date())
 
-	const daysOfWeek = ["S", "M", "T", "W", "T", "F", "S"]
+	const daysOfWeek = ["D", "S", "T", "Q", "Q", "S", "S"]
 	const months = [
 		"Janeiro",
 		"Fevereiro",
@@ -47,12 +48,12 @@ const PsychologistDashboard = () => {
 
 		const days = []
 
-		// Add empty cells for days before the first day of month
+		// Adiciona espaços vazios até o primeiro dia do mês
 		for (let i = 0; i < startingDayOfWeek; i++) {
 			days.push(null)
 		}
 
-		// Add days of the month
+		// Adiciona os dias reais
 		for (let day = 1; day <= daysInMonth; day++) {
 			days.push(day)
 		}
@@ -72,6 +73,11 @@ const PsychologistDashboard = () => {
 		)
 	}
 
+	const today = new Date()
+	const isCurrentMonth =
+		today.getMonth() === currentDate.getMonth() &&
+		today.getFullYear() === currentDate.getFullYear()
+
 	return (
 		<div className="min-h-screen bg-background">
 			{/* Header */}
@@ -81,14 +87,17 @@ const PsychologistDashboard = () => {
 						<h1 className="text-xl font-bold text-foreground">
 							Olá, Psicólogo {user.first_name}
 						</h1>
-						<p className="text-sm text-muted-foreground">Jun 24th, 2021</p>
+						<p className="text-sm text-muted-foreground">
+							{today.toLocaleDateString("pt-BR", {
+								weekday: "long",
+								day: "numeric",
+								month: "long",
+								year: "numeric",
+							})}
+						</p>
 					</div>
 					<div className="flex items-center gap-4">
-						<img
-							src={brainLogo}
-							alt="PsicoAjuda"
-							className="w-8 h-8"
-						/>
+						<img src={brainLogo} alt="PsicoAjuda" className="w-8 h-8" />
 						<div
 							className="w-10 h-10 rounded-full bg-primary flex items-center justify-center cursor-pointer"
 							onClick={() => navigate("/psychologist/profile")}
@@ -98,23 +107,15 @@ const PsychologistDashboard = () => {
 					</div>
 				</div>
 
-				{/* Calendar */}
+				{/* Calendário */}
 				<Card className="p-4 bg-primary/10">
 					<div className="flex items-center justify-between mb-4">
 						<h2 className="font-medium text-foreground">Meu Calendário</h2>
 						<div className="flex gap-2">
-							<Button
-								variant="ghost"
-								size="icon"
-								onClick={handlePrevMonth}
-							>
+							<Button variant="ghost" size="icon" onClick={handlePrevMonth}>
 								<ChevronLeft className="h-4 w-4" />
 							</Button>
-							<Button
-								variant="ghost"
-								size="icon"
-								onClick={handleNextMonth}
-							>
+							<Button variant="ghost" size="icon" onClick={handleNextMonth}>
 								<ChevronRight className="h-4 w-4" />
 							</Button>
 						</div>
@@ -139,14 +140,11 @@ const PsychologistDashboard = () => {
 
 					<div className="grid grid-cols-7 gap-1">
 						{getDaysInMonth(currentDate).map((day, index) => (
-							<div
-								key={index}
-								className="text-center p-2"
-							>
+							<div key={index} className="text-center p-2">
 								{day && (
 									<span
 										className={`text-sm ${
-											day === 24
+											isCurrentMonth && day === today.getDate()
 												? "bg-primary text-primary-foreground rounded-full px-2 py-1"
 												: "text-foreground"
 										}`}
@@ -160,9 +158,9 @@ const PsychologistDashboard = () => {
 				</Card>
 			</div>
 
-			{/* Content */}
+			{/* Conteúdo principal */}
 			<div className="px-6 space-y-6 pb-24">
-				{/* My Patients */}
+				{/* Meus pacientes */}
 				<Card
 					className="p-4 cursor-pointer"
 					onClick={() => navigate("/psychologist/patients")}
@@ -173,7 +171,7 @@ const PsychologistDashboard = () => {
 					</div>
 				</Card>
 
-				{/* Scheduled Appointments */}
+				{/* Consultas Marcadas */}
 				<Card className="p-4">
 					<div className="mb-4">
 						<h3 className="font-medium text-foreground">Consultas Marcadas</h3>
@@ -183,19 +181,14 @@ const PsychologistDashboard = () => {
 						<div className="text-2xl font-bold text-primary">12</div>
 						<div className="text-sm text-foreground">Consultas</div>
 					</div>
-					<Progress
-						value={75}
-						className="mt-4 h-2"
-					/>
+					<Progress value={75} className="mt-4 h-2" />
 				</Card>
 
-				{/* Add New Patient */}
+				{/* Adicionar novo paciente */}
 				<Card className="p-4">
 					<div className="flex items-center justify-between">
 						<div>
-							<h3 className="font-medium text-primary">
-								Adicionar novo paciente
-							</h3>
+							<h3 className="font-medium text-primary">Adicionar novo paciente</h3>
 							<p className="text-xs text-muted-foreground">
 								Pacientes com agendas ativas
 							</p>
@@ -211,28 +204,21 @@ const PsychologistDashboard = () => {
 					</div>
 				</Card>
 
-				{/* Sessions */}
+				{/* Sessões */}
 				<Card className="p-4">
 					<div className="mb-4">
 						<div className="text-2xl font-bold text-primary">37</div>
 						<div className="text-sm text-foreground">Sessões</div>
 						<p className="text-xs text-muted-foreground">Total este mês</p>
 					</div>
-					<Progress
-						value={60}
-						className="h-2"
-					/>
+					<Progress value={60} className="h-2" />
 				</Card>
 			</div>
 
-			{/* Bottom Navigation */}
+			{/* Navegação inferior */}
 			<div className="fixed bottom-0 left-0 right-0 bg-background border-t border-border">
 				<div className="flex items-center justify-around py-3">
-					<Button
-						variant="ghost"
-						size="icon"
-						className="text-primary"
-					>
+					<Button variant="ghost" size="icon" className="text-primary">
 						<BarChart3 className="h-5 w-5" />
 					</Button>
 					<Button
@@ -243,18 +229,10 @@ const PsychologistDashboard = () => {
 					>
 						<Calendar className="h-5 w-5" />
 					</Button>
-					<Button
-						variant="ghost"
-						size="icon"
-						className="text-muted-foreground"
-					>
+					<Button variant="ghost" size="icon" className="text-muted-foreground">
 						<Users className="h-5 w-5" />
 					</Button>
-					<Button
-						variant="ghost"
-						size="icon"
-						className="text-muted-foreground"
-					>
+					<Button variant="ghost" size="icon" className="text-muted-foreground">
 						<User className="h-5 w-5" />
 					</Button>
 				</div>
