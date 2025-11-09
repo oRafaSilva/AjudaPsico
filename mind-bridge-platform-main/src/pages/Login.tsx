@@ -1,20 +1,40 @@
 import { useState } from "react"
-import { useNavigate, Link } from "react-router-dom"
+import { useNavigate, useLocation, Link } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { ArrowLeft, Mail, Lock } from "lucide-react"
 import brainLogo from "@/assets/brain-logo.png"
-import {loginUser} from "@/lib/utils"
+import { loginUser } from "@/lib/utils"
+import { useAuth } from "../contexts/AuthContext" // ✅ Importa o hook do contexto
 
-const PatientLogin = () => {
+const Login = () => {
 	const [email, setEmail] = useState("")
 	const [password, setPassword] = useState("")
 	const navigate = useNavigate()
+	const location = useLocation()
+	const { login } = useAuth() // ✅ pega o login do contexto
+
+	// Detecta o tipo de usuário pela rota
+	const userType = location.pathname.includes("psychologist")
+		? "psychologist"
+		: "patient"
+	const isPsychologist = userType === "psychologist"
 
 	const handleLogin = async () => {
-		const userWasLogged = await loginUser(email, password, "patient")
-		if (userWasLogged) return navigate("/patient/dashboard")
-		else console.log("erro")
+		try {
+			const userData = await loginUser(email, password, userType)
+			if (userData) {
+				// ✅ salva o usuário globalmente no contexto
+				login(userData)
+
+				// redireciona para o dashboard certo
+				navigate(`/${userType}/dashboard`)
+			} else {
+				console.error("Erro ao fazer login: retorno inválido")
+			}
+		} catch (err) {
+			console.error("Erro ao fazer login:", err)
+		}
 	}
 
 	return (
@@ -45,7 +65,7 @@ const PatientLogin = () => {
 			{/* Content */}
 			<div className="flex-1 flex flex-col justify-center max-w-sm mx-auto w-full">
 				<h1 className="text-2xl font-bold text-foreground mb-8">
-					Bem-vindo paciente!
+					{isPsychologist ? "Bem-vindo Psicólogo!" : "Bem-vindo Paciente!"}
 				</h1>
 
 				<div className="space-y-4 mb-6">
@@ -73,7 +93,7 @@ const PatientLogin = () => {
 
 					<div className="text-right">
 						<Link
-							to="/patient/forgot-password"
+							to={`/${userType}/forgot-password`}
 							className="text-primary text-sm hover:underline"
 						>
 							Esqueci minha senha
@@ -82,7 +102,7 @@ const PatientLogin = () => {
 				</div>
 
 				<Button
-					variant="psychologist"
+					variant={isPsychologist ? "psychologist" : "default"}
 					className="w-full h-12 mb-4"
 					onClick={handleLogin}
 				>
@@ -91,7 +111,7 @@ const PatientLogin = () => {
 
 				<div className="text-center">
 					<Link
-						to="/patient/register"
+						to={`/${userType}/register`}
 						className="text-primary text-sm hover:underline"
 					>
 						Cadastre-se
@@ -102,4 +122,4 @@ const PatientLogin = () => {
 	)
 }
 
-export default PatientLogin
+export default Login

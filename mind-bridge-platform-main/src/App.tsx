@@ -4,7 +4,6 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import UserSelection from "./pages/UserSelection";
-import PsychologistLogin from "./pages/psychologist/PsychologistLogin";
 import PsychologistRegister from "./pages/psychologist/PsychologistRegister";
 import PsychologistDashboard from "./pages/psychologist/PsychologistDashboard";
 import PsychologistProfile from "./pages/psychologist/PsychologistProfile";
@@ -14,7 +13,6 @@ import PsychologistGenerateInvite from "./pages/psychologist/PsychologistGenerat
 import PsychologistShareInvite from "./pages/psychologist/PsychologistShareInvite";
 import PsychologistPatientProfile from "./pages/psychologist/PatientProfile";
 import PatientConsultations from "./pages/psychologist/PatientConsultations";
-import PatientLogin from "./pages/patient/PatientLogin";
 import PatientRegister from "./pages/patient/PatientRegister";
 import PatientDashboard from "./pages/patient/PatientDashboard";
 import PatientCalendar from "./pages/patient/PatientCalendar";
@@ -25,6 +23,7 @@ import PatientDailyRecords from "./pages/patient/PatientDailyRecords";
 import PatientAddRecord from "./pages/patient/PatientAddRecord";
 import ForgotPassword from "./pages/ForgotPassword";
 import NotFound from "./pages/NotFound";
+import Login from "./pages/Login";
 
 const queryClient = new QueryClient();
 
@@ -36,7 +35,8 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<UserSelection />} />
-          <Route path="/psychologist/login" element={<PsychologistLogin />} />
+          <Route path="/psychologist/login" element={<Login />} />
+          <Route path="/patient/login" element={<Login />} />
           <Route path="/psychologist/register" element={<PsychologistRegister />} />
           <Route path="/psychologist/dashboard" element={<PsychologistDashboard />} />
           <Route path="/psychologist/profile" element={<PsychologistProfile />} />
@@ -46,7 +46,6 @@ const App = () => (
           <Route path="/psychologist/share-invite" element={<PsychologistShareInvite />} />
           <Route path="/psychologist/patient/:patientId" element={<PsychologistPatientProfile />} />
           <Route path="/psychologist/patient/:patientId/consultations" element={<PatientConsultations />} />
-          <Route path="/patient/login" element={<PatientLogin />} />
           <Route path="/patient/register" element={<PatientRegister />} />
           <Route path="/patient/dashboard" element={<PatientDashboard />} />
         <Route path="/patient/calendar" element={<PatientCalendar />} />
