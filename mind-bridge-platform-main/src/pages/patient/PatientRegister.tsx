@@ -170,7 +170,7 @@ const PatientRegister = () => {
 										type="text"
 										placeholder="Carlos"
 										value={formData.firstName}
-										onChange={(e) => handleInputChange("name", e.target.value)}
+										onChange={(e) => handleInputChange("firstName", e.target.value)}
 										className="pl-12 h-12 border-border"
 									/>
 								</div>
@@ -186,7 +186,7 @@ const PatientRegister = () => {
 										type="text"
 										placeholder="Cardoso"
 										value={formData.lastName}
-										onChange={(e) => handleInputChange("name", e.target.value)}
+										onChange={(e) => handleInputChange("lastName", e.target.value)}
 										className="pl-12 h-12 border-border"
 									/>
 								</div>
